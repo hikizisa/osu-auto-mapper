@@ -20,3 +20,8 @@ then analyze intensity whether it should be expressed as objects.
 
 including auto hitsounder also working as standalone would be good.
 it'd be easier than auto mapper imo. if it just implements basic drum hitsounding.
+
+Place objects considering the preceding objects at first.
+After that adjust objects' positions considering the preceding and succeeding objects several times.
+
+Treat stack as unique case. it may cause distance to converge to wrong value overall
