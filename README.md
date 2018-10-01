@@ -15,3 +15,6 @@ requirements:
 
 # distinguish clickable sounds from others.
 # then analyze intensity whether it should be expressed as objects.
+
+# including auto hitsounder also working as standalone would be good.
+# it'd be easier than auto mapper imo. if it just implements basic drum hitsounding.
