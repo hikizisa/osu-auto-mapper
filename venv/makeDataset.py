@@ -3,6 +3,7 @@ import os, configparser
 import osuT as o
 import parseAudio
 import parseMap
+from readSongList import
 
 # this is a mainscript for making training dataset
 
@@ -12,5 +13,11 @@ def sortDifficulty(listBeatmap):
 def makeTrainData(beatmap):
     pass
 
+def getListnpy():
+    config = configparser.ConfigParser()
+    config.read("automapper.cfg")
+    listBeatmap = np.load(os.path.join(config.get('ReadSongs','savename')) + '.npy')
+    return listBeatmap
+
 def main():
-    listBeatmap = np.load(savePath + '.npy')
+    listBeatmap = getListnpy()
