@@ -1,4 +1,5 @@
-import os, configparser, scipy
+import os, configparser
+import scipy.io.wavfile as wavfile, scipy.fftpack as fftpack
 import subprocess as sp
 
 # this is a main script for making audio dataset with fft
@@ -26,7 +27,11 @@ def toWav(audio):
         raise Exception('error occurred while converting : ' + audio + '\n')
 
 def doFft(wav):
-    pass
+    wavedata = wavfile.read(wav)
+    samplerate = wavdata[0]
+    data = wavdata[1]
+
+    ftdata = abs(scipy.fft(data))
 
 def loadSongData(audio):
     toWav(audio)
