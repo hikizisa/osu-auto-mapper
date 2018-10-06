@@ -5,7 +5,32 @@ import osuT as o
 # this is a script for making beatmap dataset
 
 def general(f, data):
-    pass
+    line = f.readline()
+
+    mp3 = '' ; stackLeniency = 0.0 ; mode = 0 ; sampleSet = 1
+
+    while True:
+        if line.startswith('['):
+            break
+        parsed = line.split('=')
+
+        info = parsed[0].lstrip().rstrip() ; val = parsed[1].lstrip().rstrip()
+        if info == 'AudioFilename': mp3 = val
+        elif info == 'StackLeniency':
+            try: stackLeniency = float(val)
+            except SyntaxError: stackLeniency = 0.0
+        elif info == 'Mode':
+            try: mode = int(val)
+            except SyntaxError: mode = 0
+        elif info == 'SampleSet':
+            if(val == 'Normal'): sampleSet = 0
+            elif(val == 'Soft'): sampleSet = 1
+            elif(val == 'Drum'): sampleSet = 2
+        line = f.readline()
+
+    data.general(mp3, stackLeniency, mode, sampleSet)
+
+    return line
 
 def editor(f, data):
     pass
@@ -27,22 +52,22 @@ def findHeader(header):
 
 def processHeader(header, f, data):
     if header == 'General':
-        f = general(f, data)
+        line = general(f, data)
     elif header == 'Editor':
-        f = editor(f, data)
+        line = editor(f, data)
     elif header == 'Metadata':
-        f = metadata(f, data)
+        line = metadata(f, data)
     elif header == 'Difficulty':
-        f = difficulty(f, data)
+        line = difficulty(f, data)
     elif header == 'TimingPoints':
-        f = timing(f, data)
+        line = timing(f, data)
     elif header == 'HitObjects':
-        f = hitobjects(f, data)
+        line = hitobjects(f, data)
     else:
         pass
 
     # do I have to return file object?
-    return f
+    return line
 
 def readFile(osu):
     f = open(osu, 'r')
@@ -57,6 +82,9 @@ def readFile(osu):
             line = f.readline()
             continue
 
-        f = processHeader(header,f,data)
+        line = processHeader(header,f,data)
 
     f.close()
+
+if __name__ == "__main__":
+    pass
