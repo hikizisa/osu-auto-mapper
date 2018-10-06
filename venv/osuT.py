@@ -1,19 +1,21 @@
 class Object:
-	pass
+	def hs(hs):
+		pass
 
-class hitsoundData:
+class Hitsound:
 	pass
 
 class BeatmapData:
 	def __init__():
 		self.objects = []
-		self.mode = 0
-	def mp3(mp3):
+	def general(mp3 = '', stackLeniency = 0.0, mode = 0, sampleSet = 1):
 		self.mp3 = mp3
-	def general(stackLeniency, mode):
 		self.stackLeniency = stackLeniency
+		# 0 = std, 1 = taiko, 2 = ctb, 3 = mania
 		self.mode = mode
-	def difficulty(hp,cs,od,ar,sm,st):
+		# 0 = normal, 1 = soft, 2 = drum
+		sampleSet = sampleSet
+	def difficulty(hp = 5, cs = 5, od = 5, ar = 5, sm = 1.0, st = 1.0):
 		#sm = SliderMultiplier, st = SliderTickRate
 		self.hp = hp
 		self.cs = cs
@@ -21,7 +23,7 @@ class BeatmapData:
 		self.ar = ar
 		self.sm = sm
 		self.st = st
-	def metadata(title, id):
+	def metadata(title = '', id = 0):
 		self.title = title
 		self.id = id
 	def addobjects(object):
