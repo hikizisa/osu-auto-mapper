@@ -4,17 +4,23 @@ import osuT as o
 
 # this is a script for making beatmap dataset
 
-def general(f, data):
-    line = f.readline()
+# check if filestream works properly
 
+def processLine(line):
+    parsed = line.split('=')
+    info = parsed[0].lstrip().rstrip();
+    val = parsed[1].lstrip().rstrip()
+    return [info, val]
+
+def general(f, data):
     mp3 = '' ; stackLeniency = 0.0 ; mode = 0 ; sampleSet = 1
 
     while True:
+        line = f.readline()
         if line.startswith('['):
             break
-        parsed = line.split('=')
+        [info, val] = processLine(line)
 
-        info = parsed[0].lstrip().rstrip() ; val = parsed[1].lstrip().rstrip()
         if info == 'AudioFilename': mp3 = val
         elif info == 'StackLeniency':
             try: stackLeniency = float(val)
@@ -26,23 +32,67 @@ def general(f, data):
             if(val == 'Normal'): sampleSet = 0
             elif(val == 'Soft'): sampleSet = 1
             elif(val == 'Drum'): sampleSet = 2
-        line = f.readline()
 
     data.general(mp3, stackLeniency, mode, sampleSet)
 
     return line
 
-def editor(f, data):
-    pass
-
 def metadata(f, data):
-    pass
+    title = '' ; id = 0 ; version = ''
+
+    while True:
+        line = f.readline()
+        if line.startswith('['):
+            break
+        [info, val] = processLine(line)
+
+        if info == 'Title': title = val
+        elif info == 'BeatmapID':id = val
+        elif info == 'Version':version = val
+
+    data.metadata(title,id,version)
+
+    return line
 
 def difficulty(f, data):
-    pass
+    hp = 5; cs = 5; od = 5; ar = -1; sm = 1.0; st = 1.0
+
+    def tryInt(val):
+        try: result = int(val)
+        except SyntaxError: return 5
+        return result
+
+    while True:
+        line = f.readline()
+        if line.startswith('['):
+            break
+        [info, val] = processLine(line)
+
+        if info == 'HPDrainRate': hp = tryInt(val)
+        elif info == 'CircleSize': cs = tryInt(val)
+        elif info == 'OverallDifficulty': od = tryInt(val)
+        elif info == 'ApproachRate': ar = tryInt(val)
+        elif info == 'SliderMultiplier':
+            try: sm = float(val)
+            except SyntaxError: sm = 1.0
+        elif info == 'SliderTickRate':
+            try: st = float(val)
+            except SyntaxError: st = 1.0
+
+    # old map doesn't have ar value, od is the ar
+    if ar == -1:
+        ar = od
+
+    data.difficulty(hp,cs,od,ar,sm,st)
+
+    return line
 
 def timing(f, data):
-    pass
+    while True:
+        line = f.readline()
+        if line.startswith('['):
+            break
+        parsed = line.split(',')
 
 def hitobjects(f, data):
     pass
@@ -53,8 +103,14 @@ def findHeader(header):
 def processHeader(header, f, data):
     if header == 'General':
         line = general(f, data)
-    elif header == 'Editor':
-        line = editor(f, data)
+
+    # Editor, Events info doesn't seem to be useful for training.
+
+    # elif header == 'Editor':
+    #    line = editor(f, data)
+    # elif header == 'Events':
+    #    line = editor(f, data)
+
     elif header == 'Metadata':
         line = metadata(f, data)
     elif header == 'Difficulty':

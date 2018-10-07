@@ -23,9 +23,12 @@ class BeatmapData:
 		self.ar = ar
 		self.sm = sm
 		self.st = st
-	def metadata(title = '', id = 0):
+	def metadata(title = '', id = 0, version = ''):
 		self.title = title
 		self.id = id
+		self.version = version
+	def timing(self):
+		pass
 	def addobjects(object):
 		self.objects.append(object)
 	def sortobjectTime():
