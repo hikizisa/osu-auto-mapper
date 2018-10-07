@@ -92,7 +92,19 @@ def timing(f, data):
         line = f.readline()
         if line.startswith('['):
             break
-        parsed = line.split(',')
+        try:
+            parsed = line.split(',')
+            offset = int(parsed[0])
+            beatlength = float(parsed[1])
+            meter = int(parsed[2])
+            sampleSet = int(parsed[3])
+            sample = int(parsed[4])
+            volume = int(parsed[5])
+            inherited = int(parsed[6])
+            kiai = int(parsed[7])
+        except SyntaxError: continue
+        data.timing(o.BeatmapData.TimingPoint(offset, beatlength, meter, sampleSet, sample, volume, inherited, kiai))
+    return line
 
 def hitobjects(f, data):
     pass
