@@ -1,6 +1,6 @@
 import numpy as np
 import os, configparser
-import osuT as o
+import osuType as o
 
 # this is a script for making beatmap dataset
 
@@ -102,12 +102,54 @@ def timing(f, data):
             volume = int(parsed[5])
             inherited = int(parsed[6])
             kiai = int(parsed[7])
-        except SyntaxError: continue
+        except SyntaxError:
+            print("Failed parsing timing line")
+            continue
         data.timing(o.BeatmapData.TimingPoint(offset, beatlength, meter, sampleSet, sample, volume, inherited, kiai))
     return line
 
 def hitobjects(f, data):
-    pass
+    while True:
+        line = f.readline()
+        if line.startswith('['):
+            break
+
+        try:
+            parsed = line.split(',')
+            x = int(parsed[0])
+            y = int(parsed[1])
+            time = int(parsed[2])
+            type = int(parsed[3])
+
+            # calculate nc value
+            if type % 8 >= 4: nc = 1
+            else: nc = 0
+
+            if nc >= 1:
+                nc += (type % 128) // 16
+
+            # create object of the type
+            if type % 2 >= 1:
+                object = Circle()
+                pass
+
+            elif type % 4 >= 2:
+                #Create Slider
+                pass
+
+            elif type % 16 >= 8:
+                #Create Spinner
+                pass
+
+            elif type % 256 >= 128:
+                #Create Hold Note
+                pass
+
+        except SyntaxError:
+            print("Failed parsing objects")
+            continue
+
+    return line
 
 def findHeader(header):
     return header[1:len(header)-2]
