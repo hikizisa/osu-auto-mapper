@@ -1,16 +1,18 @@
 import numpy as np
 import os, configparser
-import osuType as o
+import osuType as ot
 
 # this is a script for making beatmap dataset
 
 # check if filestream works properly
+
 
 def processLine(line):
     parsed = line.split('=')
     info = parsed[0].lstrip().rstrip();
     val = parsed[1].lstrip().rstrip()
     return [info, val]
+
 
 def general(f, data):
     mp3 = '' ; stackLeniency = 0.0 ; mode = 0 ; sampleSet = 1
@@ -37,6 +39,7 @@ def general(f, data):
 
     return line
 
+
 def metadata(f, data):
     title = '' ; id = 0 ; version = ''
 
@@ -47,12 +50,27 @@ def metadata(f, data):
         [info, val] = processLine(line)
 
         if info == 'Title': title = val
-        elif info == 'BeatmapID':id = val
-        elif info == 'Version':version = val
+        elif info == 'BeatmapID': id = val
+        elif info == 'Version': version = val
 
-    data.metadata(title,id,version)
+    data.metadata(title, id, version)
 
     return line
+
+
+def events(f, data):
+    eventdata = []
+
+    while True:
+        line = f.readline()
+        if line.startswith('['):
+            break
+        else: eventdata.append(line)
+
+    data.events(eventdata)
+
+    return line
+
 
 def difficulty(f, data):
     hp = 5; cs = 5; od = 5; ar = -1; sm = 1.0; st = 1.0
@@ -83,9 +101,10 @@ def difficulty(f, data):
     if ar == -1:
         ar = od
 
-    data.difficulty(hp,cs,od,ar,sm,st)
+    data.difficulty(hp, cs, od, ar, sm, st)
 
     return line
+
 
 def timing(f, data):
     while True:
@@ -105,8 +124,32 @@ def timing(f, data):
         except SyntaxError:
             print("Failed parsing timing line")
             continue
-        data.timing(o.BeatmapData.TimingPoint(offset, beatlength, meter, sampleSet, sample, volume, inherited, kiai))
+        data.timing(ot.BeatmapData.TimingPoint(offset, beatlength, meter, sampleSet, sample, volume, inherited, kiai))
     return line
+
+
+def getnc(type):
+    if type % 8 >= 4: nc = 1
+    else: nc = 0
+
+    if nc >= 1:
+        nc += (type % 128) // 16
+
+    return nc
+
+
+def geths(hitsound):
+    whistle = False
+    finish = False
+    clap = False
+
+    if hitsound % 4 > 2: whistle = True
+    if hitsound % 8 > 4: finish = True
+    if hitsound % 16 > 8: clap = True
+
+    return ot.Hitsound(whistle, finish, clap)
+
+
 
 def hitobjects(f, data):
     while True:
@@ -120,18 +163,16 @@ def hitobjects(f, data):
             y = int(parsed[1])
             time = int(parsed[2])
             type = int(parsed[3])
+            hs = int(parsed[4])
 
-            # calculate nc value
-            if type % 8 >= 4: nc = 1
-            else: nc = 0
-
-            if nc >= 1:
-                nc += (type % 128) // 16
+            nc = getnc(type)
+            hitsound = geths(hs)
 
             # create object of the type
             if type % 2 >= 1:
-                object = Circle()
-                pass
+                extras = parsed[5]
+                hsinfo = ot.HsInfo()
+                obj = ot.Circle(x, y, time, hitsound, nc, hsinfo)
 
             elif type % 4 >= 2:
                 #Create Slider
@@ -143,7 +184,11 @@ def hitobjects(f, data):
 
             elif type % 256 >= 128:
                 #Create Hold Note
-                pass
+                continue
+
+            else: continue
+
+            data.objects.append(obj)
 
         except SyntaxError:
             print("Failed parsing objects")
@@ -151,8 +196,10 @@ def hitobjects(f, data):
 
     return line
 
+
 def findHeader(header):
     return header[1:len(header)-2]
+
 
 def processHeader(header, f, data):
     if header == 'General':
@@ -162,9 +209,8 @@ def processHeader(header, f, data):
 
     # elif header == 'Editor':
     #    line = editor(f, data)
-    # elif header == 'Events':
-    #    line = editor(f, data)
-
+    elif header == 'Events':
+        line = events(f, data)
     elif header == 'Metadata':
         line = metadata(f, data)
     elif header == 'Difficulty':
@@ -179,9 +225,14 @@ def processHeader(header, f, data):
     # do I have to return file object?
     return line
 
+
 def readFile(osu):
     f = open(osu, 'r')
-    data = o.BeatmapData()
+
+    version = f.readline()
+    data = ot.BeatmapData()
+
+    data.setVersion(version)
 
     line = f.readline()
     while True:
@@ -195,6 +246,7 @@ def readFile(osu):
         line = processHeader(header,f,data)
 
     f.close()
+
 
 if __name__ == "__main__":
     pass
