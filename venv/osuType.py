@@ -2,29 +2,25 @@ from enum import Enum
 import operator
 
 
-class HsSet(Enum):
-    AUTO = 0
-    NORMAL = 1
-    SOFT = 2
-    DRUM = 3
-
-
 class Hitsound:
-    def __init__(self, whistle = False, finish = False, clap = False):
+    def __init__(self, whistle: bool = False, finish: bool = False, clap: bool = False):
         self.whistle = whistle
         self.finish = finish
         self.clap = clap
 
 
-class HsInfo:
-    def __init__(self, sampleSet = HsSet.AUTO, addSet = HsSet.AUTO,
-                 volume = 0, customIndex = 0, filename = '', hitsound = Hitsound()):
+class Hsinfo:
+    #    AUTO = 0
+    #    NORMAL = 1
+    #    SOFT = 2
+    #    DRUM = 3
+    def __init__(self, sampleSet: int = 0, addSet: int = 0,
+                customIndex: int = 0, volume: int = 0, filename: str = ''):
         self.sampleSet = sampleSet
         self.addSet = addSet
-        self.volume = volume
         self.customIndex = customIndex
+        self.volume = volume
         self.filename = filename
-        self.hitsound = hitsound
 
 
 class SliderType(Enum):
@@ -35,39 +31,45 @@ class SliderType(Enum):
 
 
 class Object:
-    def __init__(self, x = 0, y = 0, time = 0, hsinfo = HsInfo(), nc = 0):
+    def __init__(self, x: int = 0, y: int = 0, time: int = 0, hitsound: Hitsound = Hitsound(),
+                 nc: int = 0, extras: Hsinfo = Hsinfo()):
         self.x = x
         self.y = y
         self.time = time
-        self.hsinfo = hsinfo
+        self.hitsound = hitsound
+        self.extras = extras
         self.nc = nc
 
 
 class Circle(Object):
     # Circle doesn't have additional attributes
-    def __init__(self, x = 0, y = 0, time = 0, hsinfo = HsInfo(), nc = 0):
-        super(Circle, self).__init__(x, y, time, hsinfo, nc)
+    def __init__(self, x: int = 0, y: int = 0, time: int = 0, hitsound: Hitsound = Hitsound(),
+                 nc: int = 0, extras: Hsinfo = Hsinfo()):
+        super(Circle, self).__init__(x, y, time, hitsound, nc, extras)
 
 
 class Slider(Object):
-    def __init__(self, x = 0, y = 0, time = 0, hsinfo = HsInfo(), nc = 0,
-                 curvePoints = [], repeat = 1, pixelLength = 0, edgeHitsounds = []):
+    def __init__(self, x: int = 0, y: int = 0, time: int = 0, hitsound: Hitsound = Hitsound(),
+                 nc: int = 0, type: SliderType = SliderType.L, curvePoints: [(int, int)] = [], repeat: int = 1, pixelLength: int = 0,
+                 edgeHitsounds: [Hitsound] = []):
         super(Slider, self).__init__(x, y, time, hsinfo, nc)
-        if curvePoints == []:
-            curvePoints = [(x,y)]
-        if edgeHitsounds == []:
+
+        if len(curvePoints) == 0:
+            curvePoints = [(x, y)]
+        if len(edgeHitsounds) == 0:
             edgeHitsounds = [Hitsound()]
 
         # (x, y) type of curve points
+        self.type = type
         self.curvePoints = curvePoints
         self.repeat = repeat
         self.pixelLength = pixelLength
-        # HsInfo type of hitsound, repeat + 1 length
+        # Hsinfo type of hitsound, repeat + 1 length
         self.edgeHitsounds = edgeHitsounds
 
 
 class Spinner(Object):
-    def __init__(self, x = 0, y = 0, time = 0, hsinfo = HsInfo(), nc = 0, endtime = 0):
+    def __init__(self, x = 0, y = 0, time = 0, hsinfo = Hsinfo(), nc = 0, endtime = 0):
         super(Spinner, self).__init__(x, y, time, hsinfo, nc)
         self.endtime = endtime
 
@@ -78,7 +80,7 @@ class Hold(Object):
 
 
 class TimingPoint:
-    def __init__(self, offset = 0, beatlength = 500, meter = 4, hsinfo = HsInfo(), inherited = 0, kiai = 0):
+    def __init__(self, offset = 0, beatlength = 500, meter = 4, hsinfo = Hsinfo(), inherited = 0, kiai = 0):
         self.offset = offset
         self.beatlength = beatlength
         self.meter = meter

@@ -150,6 +150,22 @@ def geths(hitsound):
     return ot.Hitsound(whistle, finish, clap)
 
 
+def gethsinfo(data):
+    extras = data.split(':')
+
+    try:
+        sampleSet = int(extras[0])
+        additionSet = int(extras[1])
+        customIndex = int(extras[2])
+        sampleVolume = int(extras[3])
+        filename = extras[4]
+
+    except SyntaxError:
+        print("Failed parsing extras")
+
+    return ot.Hsinfo(sampleSet, additionSet, customIndex, sampleVolume, filename)
+
+
 
 def hitobjects(f, data):
     while True:
@@ -170,20 +186,20 @@ def hitobjects(f, data):
 
             # create object of the type
             if type % 2 >= 1:
-                extras = parsed[5]
-                hsinfo = ot.HsInfo()
+                # Create Circle
+                hsinfo = gethsinfo(parsed[5])
                 obj = ot.Circle(x, y, time, hitsound, nc, hsinfo)
 
             elif type % 4 >= 2:
-                #Create Slider
+                # Create Slider
                 pass
 
             elif type % 16 >= 8:
-                #Create Spinner
+                # Create Spinner
                 pass
 
             elif type % 256 >= 128:
-                #Create Hold Note
+                # Create Hold Note
                 continue
 
             else: continue
